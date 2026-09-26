@@ -30,13 +30,31 @@ export default function ApplicationReviewPage({ params }: { params: Promise<{ id
         </div>
         
         <div className="flex gap-3">
-          <button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-red-200 text-red-600 hover:bg-red-50 font-bold shadow-sm transition-all">
+          <button 
+            onClick={() => {
+              alert("Application rejected and returned to applicant.");
+              router.push("/admin/queue");
+            }}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-red-200 text-red-600 hover:bg-red-50 font-bold shadow-sm transition-all"
+          >
             <XCircle size={18} /> Reject
           </button>
-          <button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-500 text-white hover:bg-amber-600 font-bold shadow-sm transition-all">
+          <button 
+            onClick={() => {
+              alert("Application marked as deficient. Notification sent.");
+              router.push("/admin/queue");
+            }}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-500 text-white hover:bg-amber-600 font-bold shadow-sm transition-all"
+          >
             <AlertCircle size={18} /> Mark Deficient
           </button>
-          <button className="flex items-center gap-2 px-6 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-bold shadow-md hover:shadow-lg transition-all">
+          <button 
+            onClick={() => {
+              alert("Application approved successfully!");
+              router.push("/admin/queue");
+            }}
+            className="flex items-center gap-2 px-6 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-bold shadow-md hover:shadow-lg transition-all"
+          >
             <CheckCircle2 size={18} /> Approve
           </button>
         </div>
