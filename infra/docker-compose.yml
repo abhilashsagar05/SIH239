@@ -1,0 +1,109 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: mota_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: mota_scholarship
+      POSTGRES_USER: mota_user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mota_secret_2026}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./schema.sql:/docker-entrypoint-initdb.d/01_schema.sql
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mota_user -d mota_scholarship"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: mota_redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-redis_secret_2026}
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    container_name: mota_backend
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://mota_user:${POSTGRES_PASSWORD:-mota_secret_2026}@postgres:5432/mota_scholarship
+      REDIS_URL: redis://:${REDIS_PASSWORD:-redis_secret_2026}@redis:6379/0
+      SECRET_KEY: ${SECRET_KEY:-change_me_in_production}
+      ENVIRONMENT: development
+      S3_BUCKET: mota-documents
+      S3_ENDPOINT_URL: ${S3_ENDPOINT_URL}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+    volumes:
+      - ../backend:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  celery_worker:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    container_name: mota_celery_worker
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://mota_user:${POSTGRES_PASSWORD:-mota_secret_2026}@postgres:5432/mota_scholarship
+      REDIS_URL: redis://:${REDIS_PASSWORD:-redis_secret_2026}@redis:6379/0
+      SECRET_KEY: ${SECRET_KEY:-change_me_in_production}
+    volumes:
+      - ../backend:/app
+    depends_on:
+      - backend
+      - redis
+    command: celery -A app.tasks.worker worker --loglevel=info --concurrency=4 -Q ocr,matching,notifications
+
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    container_name: mota_frontend
+    restart: unless-stopped
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000/api/v1
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+  nginx:
+    image: nginx:alpine
+    container_name: mota_nginx
+    restart: unless-stopped
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - backend
+      - frontend
+
+volumes:
+  postgres_data:
+  redis_data:

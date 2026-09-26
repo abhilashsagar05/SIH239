@@ -1,0 +1,57 @@
+@import "tailwindcss";
+
+@import "tailwindcss";
+
+@theme {
+  --color-brand-50: #eff6ff;
+  --color-brand-100: #dbeafe;
+  --color-brand-500: #3b82f6;
+  --color-brand-600: #2563eb;
+  --color-brand-900: #1e3a8a;
+  
+  --color-surface-50: #f8fafc;
+  --color-surface-100: #f1f5f9;
+  --color-surface-800: #1e293b;
+  --color-surface-900: #0f172a;
+}
+
+:root {
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --card: rgba(255, 255, 255, 0.8);
+  --card-border: rgba(255, 255, 255, 0.4);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0f172a;
+    --foreground: #f8fafc;
+    --card: rgba(30, 41, 59, 0.7);
+    --card-border: rgba(255, 255, 255, 0.1);
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.15) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(147, 51, 234, 0.15) 0px, transparent 50%);
+  background-attachment: fixed;
+}
+
+.glass-card {
+  background: var(--card);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--card-border);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.05);
+}
+
+.text-gradient {
+  background: linear-gradient(to right, #2563eb, #9333ea);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}

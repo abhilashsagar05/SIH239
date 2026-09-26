@@ -1,0 +1,13 @@
+{
+  "venvPath": ".",
+  "venv": ".venv",
+  "pythonVersion": "3.13",
+  "pythonPlatform": "Windows",
+  "include": ["app", "../ai_engine"],
+  "exclude": ["**/__pycache__", ".venv"],
+  "extraPaths": [".", ".."],
+  "typeCheckingMode": "basic",
+  "reportMissingImports": "warning",
+  "reportMissingModuleSource": "none",
+  "useLibraryCodeForTypes": true
+}
